@@ -84,10 +84,12 @@ const lmic_pinmap lmic_pins = {
     .nss = SS,
     .rxtx = LMIC_UNUSED_PIN,
     .rst = RST,
-    .dio = {DIO0, DIO1, DIO2},
+    .dio = {DIO0, DIO0, LMIC_UNUSED_PIN},
 };
 
 void onEvent (ev_t ev) {
+    Serial.print(ev);
+    Serial.print(" / ");
     Serial.print(os_getTime());
     Serial.print(": ");
     display.clear();
