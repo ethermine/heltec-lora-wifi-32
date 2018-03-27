@@ -84,7 +84,7 @@ const lmic_pinmap lmic_pins = {
     .nss = SS,
     .rxtx = LMIC_UNUSED_PIN,
     .rst = RST,
-    .dio = {DIO0, DIO0, LMIC_UNUSED_PIN},
+    .dio = {DIO0, DIO0, DIO2},
 };
 
 void onEvent (ev_t ev) {
@@ -93,6 +93,8 @@ void onEvent (ev_t ev) {
     Serial.print(os_getTime());
     Serial.print(": ");
     display.clear();
+    display.drawString(0, 20, "DevEUI : EF 08 45 7E B0 00 55 11");
+    display.display();
     switch(ev) {
         case EV_SCAN_TIMEOUT:
             Serial.println(F("EV_SCAN_TIMEOUT"));
@@ -240,6 +242,8 @@ void setup() {
 
 void loop() {
     os_runloop();
+    display.drawString(0, 20, "DevEUI : EF 08 45 7E B0 00 55 11");
+    display.display();
 }
 
 // initial job 
