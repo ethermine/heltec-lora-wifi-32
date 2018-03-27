@@ -28,7 +28,6 @@
  * Do not forget to define the radio type correctly in config.h.
  *
  *******************************************************************************/
-//#include <TheThingsNetwork.h>
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
@@ -39,17 +38,21 @@ SSD1306 display(0x3c, 4, 15);
 
 #define BUILTIN_LED 25
 
+osjob_t initjob;
+
 // This EUI must be in little-endian format, so least-significant-byte
 // first. When copying an EUI from ttnctl output, this means to reverse
 // the bytes. For TTN issued EUIs the last bytes should be 0xD5, 0xB3,
 // 0x70.
 // 70B3D57ED000B2AD
-static const u1_t PROGMEM APPEUI[8]={ 0x70, 0xB3, 0xD5, 0x7E, 0xD0, 0x00, 0xB2, 0xAD };
+// 70 B3 D5 7E D0 00 B2 AD
+static const u1_t PROGMEM APPEUI[8]={ 0x7AD , 0xB2, 0x00, 0xD0, 0x7E, 0xD5, 0xB3, 0x70 };
 void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
 
 // This should also be in little endian format, see above.
 // EF08457EB0005511
-static const u1_t PROGMEM DEVEUI[8]={ 0xEF, 0x08, 0x45, 0x7E, 0xB0, 0x00, 0x55, 0x11 };
+// EF 08 45 7E B0 00 55 11
+static const u1_t PROGMEM DEVEUI[8]={ 0x11, 0x55, 0x00, 0xB0, 0x7E, 0x45, 0x08, 0xEF };
 void os_getDevEui (u1_t* buf) { memcpy_P(buf, DEVEUI, 8);}
 
 // This key should be in big endian format (or, since it is not really a
@@ -65,7 +68,7 @@ static osjob_t sendjob;
 
 // Schedule TX every this many seconds (might become longer due to duty
 // cycle limitations).
-const unsigned TX_INTERVAL = 30;
+const unsigned TX_INTERVAL = 60;
 
 #define SS 18 // ESP32 GPIO18 (Pin18) – SX1276 NSS (Pin19) SPI Chip Select Input
 #define MOSI 27 // ESP32 GPIO27 (Pin27) – SX1276 MOSI (Pin18) SPI Data Input
@@ -88,7 +91,6 @@ void onEvent (ev_t ev) {
     Serial.print(os_getTime());
     Serial.print(": ");
     display.clear();
-    Serial.println(F("ev : "+ev));
     switch(ev) {
         case EV_SCAN_TIMEOUT:
             Serial.println(F("EV_SCAN_TIMEOUT"));
@@ -227,12 +229,24 @@ void setup() {
     // LMIC init
     os_init();
     // Reset the MAC state. Session and pending data transfers will be discarded.
-    LMIC_reset();
-    LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100);
+    //LMIC_reset();
+    
     // Start job (sending automatically starts OTAA too)
-    do_send(&sendjob);
+    //do_send(&sendjob);
+    os_setCallback(&initjob, initfunc);
 }
 
 void loop() {
-    os_runloop_once();
+    os_runloop();
 }
+
+// initial job 
+static void initfunc (osjob_t* j) { 
+  // reset MAC state 
+  LMIC_reset(); 
+  LMIC_setClockError(MAX_CLOCK_ERROR * 1 / 100);
+  // start joining 
+  LMIC_startJoining(); 
+  // init done - onEvent() callback will be invoked... 
+}
+
