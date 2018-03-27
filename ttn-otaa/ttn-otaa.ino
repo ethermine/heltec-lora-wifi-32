@@ -46,7 +46,7 @@ osjob_t initjob;
 // 0x70.
 // 70B3D57ED000B2AD
 // 70 B3 D5 7E D0 00 B2 AD
-static const u1_t PROGMEM APPEUI[8]={ 0x7AD , 0xB2, 0x00, 0xD0, 0x7E, 0xD5, 0xB3, 0x70 };
+static const u1_t PROGMEM APPEUI[8]={ 0xAD , 0xB2, 0x00, 0xD0, 0x7E, 0xD5, 0xB3, 0x70 };
 void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
 
 // This should also be in little endian format, see above.
