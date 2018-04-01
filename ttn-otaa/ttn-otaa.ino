@@ -114,7 +114,7 @@ void onEvent (ev_t ev) {
               Serial.println(F(" bytes of payload"));
             }
             // Schedule next transmission
-            os_setTimedCallback(&sendjob, os_getTime()+TX_INTERVAL, do_send);
+            os_setTimedCallback(&sendjob, os_getTime()+(TX_INTERVAL*10), do_send);
             break;
         case EV_LOST_TSYNC:
             Serial.println(F("EV_LOST_TSYNC"));
