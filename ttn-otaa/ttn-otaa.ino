@@ -37,7 +37,7 @@
 // first. When copying an EUI from ttnctl output, this means to reverse
 // the bytes. For TTN issued EUIs the last bytes should be 0xD5, 0xB3,
 // 0x70.
-static const u1_t PROGMEM APPEUI[8]={ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+static const u1_t PROGMEM APPEUI[8]={ 0xd5, 0xb3, 0x70, 0xb0, 0x7e, 0x45, 0x08, 0xef };
 void os_getArtEui (u1_t* buf) { memcpy_P(buf, APPEUI, 8);}
 
 // This should also be in little endian format, see above.
@@ -165,7 +165,7 @@ void setup() {
     os_init();
     // Reset the MAC state. Session and pending data transfers will be discarded.
     LMIC_reset();
-
+    LMIC_setClockError (MAX_CLOCK_ERROR * 10/100);  
     // Start job (sending automatically starts OTAA too)
     do_send(&sendjob);
 }

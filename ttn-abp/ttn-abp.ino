@@ -32,6 +32,21 @@
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
+#include "SSD1306.h" 
+
+// Pin definetion of WIFI LoRa 32
+// HelTec AutoMation 2017 support@heltec.cn 
+#define SCK     5    // GPIO5  -- SX127x's SCK
+#define MISO    19   // GPIO19 -- SX127x's MISO
+#define MOSI    27   // GPIO27 -- SX127x's MOSI
+#define SS      18   // GPIO18 -- SX127x's CS
+#define RST     14   // GPIO14 -- SX127x's RESET
+#define DIO0    26   // GPIO26 -- SX127x's IRQ(Interrupt Request)
+#define DIO1    33   // GPIO26 -- SX127x's IRQ(Interrupt Request)
+#define DIO2    32   // GPIO26 -- SX127x's IRQ(Interrupt Request)
+#define LED     25
+
+SSD1306 display(0x3c, 4, 15);
 
 // LoRaWAN NwkSKey, network session key
 // This is the default Semtech key, which is used by the early prototype TTN
@@ -63,10 +78,10 @@ const unsigned TX_INTERVAL = 60;
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
-    .nss = 18,
+    .nss = SS,
     .rxtx = LMIC_UNUSED_PIN,
-    .rst = 14,
-    .dio = {26, 33, 32},
+    .rst = RST,
+    .dio = {DIO0, DIO1, DIO2},
 };
 
 void onEvent (ev_t ev) {
@@ -150,6 +165,14 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("Starting"));
 
+    digitalWrite(16, LOW);    // set GPIO16 low to reset OLED
+    delay(50); 
+    digitalWrite(16, HIGH); // while OLED is running, must set GPIO16 in high
+  
+    display.init();
+    display.flipScreenVertically();  
+    display.setFont(ArialMT_Plain_10);
+  
     #ifdef VCC_ENABLE
     // For Pinoccio Scout boards
     pinMode(VCC_ENABLE, OUTPUT);
