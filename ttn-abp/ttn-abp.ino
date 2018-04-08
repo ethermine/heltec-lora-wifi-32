@@ -33,6 +33,7 @@
 #include <hal/hal.h>
 #include <SPI.h>
 #include "SSD1306.h" 
+#include "DHTesp.h"
 
 // Pin definetion of WIFI LoRa 32
 // HelTec AutoMation 2017 support@heltec.cn 
@@ -45,7 +46,9 @@
 #define DIO1    33   // GPIO26 -- SX127x's IRQ(Interrupt Request)
 #define DIO2    32   // GPIO26 -- SX127x's IRQ(Interrupt Request)
 #define LED     25
+#define DHT11_PIN 17 // GPIO17 -- DHT11 SIGNAL
 
+DHTesp dht;
 SSD1306 display(0x3c, 4, 15);
 
 // LoRaWAN NwkSKey, network session key
@@ -69,7 +72,8 @@ void os_getArtEui (u1_t* buf) { }
 void os_getDevEui (u1_t* buf) { }
 void os_getDevKey (u1_t* buf) { }
 
-static uint8_t mydata[] = "Hello, world!";
+//static uint8_t mydata[] = "Hello, world!";
+static uint8_t mydata[] = { 0,0,0,0,0,0,0,0};
 static osjob_t sendjob;
 
 // Schedule TX every this many seconds (might become longer due to duty
@@ -154,8 +158,15 @@ void do_send(osjob_t* j){
     if (LMIC.opmode & OP_TXRXPEND) {
         Serial.println(F("OP_TXRXPEND, not sending"));
     } else {
+        delay(dht.getMinimumSamplingPeriod());
+
+        float humidity = dht.getHumidity();
+        float temperature = dht.getTemperature();
+        dtostrf(temperature,5,2,(char*)mydata);
         // Prepare upstream data transmission at the next possible time.
-        LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
+        //LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
+        //LMIC_setTxData2(1,(uint8_t*)&temperature,sizeof(float),0);
+        LMIC_setTxData2(1, mydata, strlen((char*) mydata), 0);
         Serial.println(F("Packet queued"));
     }
     // Next TX is scheduled after TX_COMPLETE event.
@@ -168,7 +179,7 @@ void setup() {
     digitalWrite(16, LOW);    // set GPIO16 low to reset OLED
     delay(50); 
     digitalWrite(16, HIGH); // while OLED is running, must set GPIO16 in high
-  
+    dht.setup(DHT11_PIN); // Connect DHT sensor to GPIO 17
     display.init();
     display.flipScreenVertically();  
     display.setFont(ArialMT_Plain_10);
