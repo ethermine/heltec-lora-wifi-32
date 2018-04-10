@@ -34,6 +34,7 @@
 #include <SPI.h>
 #include "SSD1306.h" 
 #include "DHTesp.h"
+#include "esp_sleep.h"
 
 // Pin definetion of WIFI LoRa 32
 // HelTec AutoMation 2017 support@heltec.cn 
@@ -45,7 +46,7 @@
 #define DIO0    26   // GPIO26 -- SX127x's IRQ(Interrupt Request)
 #define DIO1    33   // GPIO26 -- SX127x's IRQ(Interrupt Request)
 #define DIO2    32   // GPIO26 -- SX127x's IRQ(Interrupt Request)
-#define LED     25
+#define LED     25   // Onboard Led
 #define DHT11_PIN 17 // GPIO17 -- DHT11 SIGNAL
 
 DHTesp dht;
@@ -63,7 +64,7 @@ static const PROGMEM u1_t NWKSKEY[16] = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0x
 static const u1_t PROGMEM APPSKEY[16] = { 0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, 0x3C };
 
 // LoRaWAN end-device address (DevAddr)
-static const u4_t DEVADDR = 0x26001EB8 ; // <-- Change this address for every node!
+static const u4_t DEVADDR = 0x26001EBA ; // <-- Change this address for every node!
 
 // These callbacks are only used in over-the-air activation, so they are
 // left empty here (we cannot leave them out completely unless
@@ -162,6 +163,7 @@ void do_send(osjob_t* j){
 
         float humidity = dht.getHumidity();
         float temperature = dht.getTemperature();
+        temperature = -2;//Test
         dtostrf(temperature,5,2,(char*)mydata);
         // Prepare upstream data transmission at the next possible time.
         //LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
@@ -223,14 +225,14 @@ void setup() {
     // configures the minimal channel set.
     // NA-US channels 0-71 are configured automatically
     LMIC_setupChannel(0, 868100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-    LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
-    LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-    LMIC_setupChannel(3, 867100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-    LMIC_setupChannel(4, 867300000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-    LMIC_setupChannel(5, 867500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-    LMIC_setupChannel(6, 867700000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-    LMIC_setupChannel(7, 867900000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
-    LMIC_setupChannel(8, 868800000, DR_RANGE_MAP(DR_FSK,  DR_FSK),  BAND_MILLI);      // g2-band
+    //LMIC_setupChannel(1, 868300000, DR_RANGE_MAP(DR_SF12, DR_SF7B), BAND_CENTI);      // g-band
+    //LMIC_setupChannel(2, 868500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+    //LMIC_setupChannel(3, 867100000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+    //LMIC_setupChannel(4, 867300000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+    //LMIC_setupChannel(5, 867500000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+    //LMIC_setupChannel(6, 867700000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+    //LMIC_setupChannel(7, 867900000, DR_RANGE_MAP(DR_SF12, DR_SF7),  BAND_CENTI);      // g-band
+    //LMIC_setupChannel(8, 868800000, DR_RANGE_MAP(DR_FSK,  DR_FSK),  BAND_MILLI);      // g2-band
     // TTN defines an additional channel at 869.525Mhz using SF9 for class B
     // devices' ping slots. LMIC does not have an easy way to define set this
     // frequency and support for class B is spotty and untested, so this
@@ -247,7 +249,8 @@ void setup() {
     LMIC_setLinkCheckMode(0);
 
     // TTN uses SF9 for its RX2 window.
-    LMIC.dn2Dr = DR_SF9;
+    //LMIC.dn2Dr = DR_SF9;
+    LMIC.dn2Dr = DR_SF7;
 
     // Set data rate and transmit power for uplink (note: txpow seems to be ignored by the library)
     LMIC_setDrTxpow(DR_SF7,14);
