@@ -32,6 +32,25 @@
 #include <lmic.h>
 #include <hal/hal.h>
 #include <SPI.h>
+#include "DHTesp.h"
+#include "esp_sleep.h"
+#include "SSD1306.h" 
+
+// Pin definetion of WIFI LoRa 32
+// HelTec AutoMation 2017 support@heltec.cn 
+#define SCK     5    // GPIO5  -- SX127x's SCK
+#define MISO    19   // GPIO19 -- SX127x's MISO
+#define MOSI    27   // GPIO27 -- SX127x's MOSI
+#define SS      18   // GPIO18 -- SX127x's CS
+#define RST     14   // GPIO14 -- SX127x's RESET
+#define DIO0    26   // GPIO26 -- SX127x's IRQ(Interrupt Request)
+#define DIO1    33   // GPIO26 -- SX127x's IRQ(Interrupt Request)
+#define DIO2    32   // GPIO26 -- SX127x's IRQ(Interrupt Request)
+#define LED     25   // Onboard Led
+#define DHT11_PIN 17 // GPIO17 -- DHT11 SIGNAL
+
+DHTesp dht;
+SSD1306 display(0x3c, 4, 15);
 
 // This EUI must be in little-endian format, so least-significant-byte
 // first. When copying an EUI from ttnctl output, this means to reverse
@@ -62,10 +81,10 @@ const unsigned TX_INTERVAL = 60;
 
 // Pin mapping
 const lmic_pinmap lmic_pins = {
-    .nss = 18,
+    .nss = SS,
     .rxtx = LMIC_UNUSED_PIN,
-    .rst = 14,
-    .dio = {26, 33, 32},
+    .rst = RST,
+    .dio = {DIO0, DIO1, DIO2},
 };
 
 void onEvent (ev_t ev) {
