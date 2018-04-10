@@ -133,7 +133,7 @@ void onEvent (ev_t ev) {
               Serial.println(F(" bytes of payload"));
             }
             // Schedule next transmission
-            os_setTimedCallback(&sendjob, os_getTime()+(TX_INTERVAL*10), do_send);
+            os_setTimedCallback(&sendjob, os_getTime()+(TX_INTERVAL), do_send);
             break;
         case EV_LOST_TSYNC:
             Serial.println(F("EV_LOST_TSYNC"));
@@ -184,7 +184,7 @@ void setup() {
     os_init();
     // Reset the MAC state. Session and pending data transfers will be discarded.
     LMIC_reset();
-    LMIC_setClockError (MAX_CLOCK_ERROR * 10/100);  
+    LMIC_setClockError(MAX_CLOCK_ERROR * 10/100);  
     // Start job (sending automatically starts OTAA too)
     do_send(&sendjob);
 }
